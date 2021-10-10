@@ -1,46 +1,57 @@
-const addCard =() => {
-    const newTaskDetails = {
-        id:`${Date.now()}`,
-        url:document.getElementById("imageURL").Value,
-        name:document.getElementById("title").Value,
-        call:document.getElementById("contact").Value,
-        homeaddress:document.getElementById("homeAddress").Value,
-        collegeaddress:document.getElementById("clgAddress").Value,
-        branch:document.getElementById("edu").Value,
-        projectlink:document.getElementById("projectURL").Value
-    }
 
-    taskContents = document.getElementById("taskContentsrc");
-    taskContents.insertAdjacentHTML('beforeend', generateTaskCard(newTaskDetails));
+let globalTaskData =[];
+taskContents = document.getElementById("taskContents");
+
+
+const addcard = () => {
+    const newTaskDetails = {
+        id: `${Date.now()}`,
+        notetitle: document.getElementById("title").value,
+        sdtitle: document.getElementById("subtitle").value,
+        notes: document.getElementById("memorynote").value
+    };
+    taskContents.insertAdjacentHTML('beforeend',generateTaskCard(newTaskDetails));
+
+    globalTaskData.push(newTaskDetails);
+    saveTolocalStorage();
 }
-const generateTaskCard = ({id, url, name, call, homeaddress, collegeaddress, branch, projectlink}) =>
-    `<div class="card mb-4 mt-5"  id=${id} key=${id} >
-            <div class="row g-0" >
-                <div class="card-header">
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-outline-info">
-                            <i class="fas fa-pencil-alt" ></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-danger">
-                            <i class="fas fa-trash-alt" ></i>
-                        </button>
-                    </div>    
-                </div>
-      <div class="col-md-8">
-        <img src=${url} class="img-fluid rounded-start" alt="image"/>
-      </div>
-      <div class="col-md-4">
-        <div class="card-body">
-            <h5 class="personname">${name}</h5>
-            <h6 class="person-no">${call}</h6>
-            <p class="personadrs">${homeaddress}</p>
-            <p class="clgadrs">${collegeaddress}</p>
-            <h6 class="badge bg-primary personb">${branch}</h6><br>
-            <code class="projects" >${projectlink}</code>
+
+const generateTaskCard = ({id, notetitle, sdtitle, notes}) =>
+    `<div class="col-md-4 col-lg-3 mt-3" id=${id} key=${id}>
+    <div class="card">
+        <div class="d-flex justify-content-end m-1 mb-0">
+           <button type="button" class="btn btn-outline-info">
+               <i class="fas fa-check-circle"></i>
+           </button>
+           <button type="button" class="btn btn-outline-danger" name=${id} onclick="deleteTask(this)" >
+            <i class="fas fa-trash"></i>
+           </button>
         </div>
-     </div>
-     <div class="card-footer">
-         <button class="btn btn-outline-primary float-end">Show Singlecard</button>
-     </div>
+        <div class="card-body">
+        <h5 class="card-title d-flex justify-content-center">${notetitle}</h5>
+        <h6 class="card-subtitle mb-2 text-muted d-flex justify-content-center ">${sdtitle}</h6>
+        <p class="card-text">${notes}</p>
+        </div>
     </div>
     </div>`
+
+    const saveTolocalStorage = () => {
+        localStorage.setItem("balu",JSON.stringify({noteslist: globalTaskData}));
+    }
+
+    const reloadTaskCard = () => {
+        const localStorageCopy = JSON.parse(localStorage.getItem("balu"));
+        if(localStorageCopy) {
+            globalTaskData = localStorageCopy["noteslist"];
+        }
+        globalTaskData.map((cardData) => {
+            taskContents.insertAdjacentHTML('beforeend',generateTaskCard(cardData));
+        })
+    }
+
+    const deleteTask = (e) => {
+        const targetID = e.getAttribute("name");
+        globalTaskData = globalTaskData.filter((cardData) => cardData.id!==targetID);
+        saveTolocalStorage();
+        window.location.reload();
+    }
